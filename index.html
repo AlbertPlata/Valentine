@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pregunta Importante</title>
+<style>
+  /* Estilos generales */
+  body { 
+    background-color: #ffe6e6; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    height: 100vh; 
+    margin: 0; 
+    overflow: hidden; 
+    font-family: 'Helvetica Neue', Arial, sans-serif; 
+  }
+
+  /* La tarjeta central */
+  .card { 
+    background: white; 
+    padding: 40px 30px; 
+    border-radius: 20px; 
+    box-shadow: 0 15px 35px rgba(214, 48, 49, 0.15); 
+    text-align: center; 
+    z-index: 10; 
+    width: 320px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative; /* Para mover el botón NO dentro de la tarjeta */
+  }
+
+  /* Textos */
+  .title { 
+    font-size: 1.6rem; 
+    color: #d63031; 
+    margin-top: 0;
+    margin-bottom: 30px;
+  }
+  
+  .success-message { 
+    display: none; 
+    animation: fadeIn 1s ease-in;
+  }
+
+  .success-message h2 { color: #d63031; margin-bottom: 10px; }
+  .success-message p { color: #636e72; line-height: 1.5; font-size: 1.1rem; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Contenedor de Botones */
+  .buttons-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    height: 50px;
+    position: relative;
+  }
+
+  /* Estilos de los botones */
+  .btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+  }
+
+  .btn-yes {
+    background-color: #ff7675;
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 118, 117, 0.4);
+    z-index: 2;
+  }
+  
+  .btn-yes:hover {
+    background-color: #d63031;
+    transform: scale(1.1);
+  }
+
+  .btn-no {
+    background-color: #f1f2f6;
+    color: #2d3436;
+    position: absolute; /* Inicialmente en flujo, pero listo para moverse */
+    right: 35px; /* Posición inicial relativa al contenedor */
+    z-index: 3;
+  }
+
+  /* Simulación de corazones flotantes */
+  .heart-particle { 
+    position: absolute; 
+    bottom: -50px; 
+    color: #ff7675; 
+    pointer-events: none; 
+    animation: floatUp linear forwards; 
+    z-index: 1;
+  }
+
+  @keyframes floatUp {
+    to { 
+      transform: translateY(-120vh) rotate(360deg); 
+      opacity: 0; 
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="valentineCard">
+  <h1 class="title" id="questionText">¿Quieres ser mi San Valentín?</h1>
+  
+  <div class="buttons-container" id="buttonsContainer">
+    <button class="btn btn-yes" id="btnYes">Sí</button>
+    <button class="btn btn-no" id="btnNo">No</button>
+  </div>
+  
+  <div class="success-message" id="successMessage">
+    <h2>¡Sabía que dirías que sí! ❤️</h2>
+    <p>Tu regalo regaloso te esta esperando my love</p>
+    <p>Te amo cariño</p>
+  </div>
+</div>
+
+<script>
+  // Elementos del DOM
+  const btnYes = document.getElementById('btnYes');
+  const btnNo = document.getElementById('btnNo');
+  const questionText = document.getElementById('questionText');
+  const buttonsContainer = document.getElementById('buttonsContainer');
+  const successMessage = document.getElementById('successMessage');
+  const card = document.getElementById('valentineCard');
+
+  // Lógica de "Evasión" para el botón NO
+  const moveButton = () => {
+    // Calculamos límites dentro de la tarjeta para que no se salga
+    const cardRect = card.getBoundingClientRect();
+    const btnRect = btnNo.getBoundingClientRect();
+    
+    const maxX = cardRect.width - btnRect.width - 20;
+    const maxY = cardRect.height - btnRect.height - 20;
+
+    const randomX = Math.floor(Math.random() * maxX);
+    const randomY = Math.floor(Math.random() * maxY);
+
+    btnNo.style.position = 'absolute';
+    // Ajustamos la posición relativa a la esquina superior izquierda de la tarjeta
+    btnNo.style.left = `${randomX}px`;
+    btnNo.style.top = `${randomY}px`;
+  };
+
+  // El botón NO se mueve tanto si pasas el mouse (PC) como si intentas tocarlo (Móvil)
+  btnNo.addEventListener('mouseover', moveButton);
+  btnNo.addEventListener('touchstart', moveButton);
+
+  // Lógica de "Éxito" para el botón SÍ
+  btnYes.addEventListener('click', () => {
+    // Ocultar pregunta y botones
+    questionText.style.display = 'none';
+    buttonsContainer.style.display = 'none';
+    
+    // Mostrar mensaje final
+    successMessage.style.display = 'block';
+    
+    // Disparar la simulación
+    runHeartSimulation();
+  });
+
+  // Motor de la simulación de partículas
+  function runHeartSimulation() {
+    const totalHearts = 50; 
+    
+    for (let i = 0; i < totalHearts; i++) {
+      const delay = Math.random() * 1500; 
+      setTimeout(spawnHeart, delay);
+    }
+  }
+
+  function spawnHeart() {
+    const heart = document.createElement('div');
+    heart.classList.add('heart-particle');
+    heart.innerHTML = '❤️';
+
+    const startPosX = Math.random() * window.innerWidth;
+    const size = Math.random() * 25 + 10; 
+    const duration = Math.random() * 4 + 3; 
+
+    heart.style.left = `${startPosX}px`;
+    heart.style.fontSize = `${size}px`;
+    heart.style.animationDuration = `${duration}s`;
+
+    document.body.appendChild(heart);
+
+    setTimeout(() => {
+      heart.remove();
+    }, duration * 10000);
+  }
+</script>
+</body>
+</html>
